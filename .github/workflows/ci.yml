@@ -1,0 +1,41 @@
+---
+name: C/C++ CI
+
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - name: Ubuntu
+            os: ubuntu-latest
+          - name: windows-x86
+            os: windows-latest
+            cmake-args: |
+              -A
+              Win32
+          - name: windows-x64
+            os: windows-latest
+            cmake-args: |
+              -A
+              x64
+          - name: macOS
+            os: macos-latest
+    runs-on: ${{matrix.os}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure and Build Project
+        uses: threeal/cmake-action@v2
+        with:
+          args: ${{matrix.cmake-args}}
+          options: |
+            SEL_URI_TESTS=ON
+      - name: Test Project
+        uses: threeal/ctest-action@v1
